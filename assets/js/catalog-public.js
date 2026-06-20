@@ -26,9 +26,10 @@ function productCardHTML(p) {
 }
 
 function categoryCardHTML(cat) {
+  const fallbackImage = `assets/images/categorias/${cat.slug}.jpg`;
   return `
     <article class="category-card">
-      <img src="${cat.image_url || 'assets/images/banners/categoria-generica.jpg'}" alt="${cat.name}" />
+      <img src="${cat.image_url || fallbackImage}" alt="${cat.name}" />
       <div>
         <h3>${cat.name}</h3>
         <a href="pages/catalogo.html?categoria=${encodeURIComponent(cat.name)}">Ver más</a>
