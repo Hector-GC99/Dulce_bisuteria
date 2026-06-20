@@ -149,6 +149,7 @@
       <div class="admin-tabs">
         <div class="admin-tab active" data-tab="products">Productos</div>
         <div class="admin-tab" data-tab="categories">Categorías</div>
+        <div class="admin-tab" data-tab="settings">Configuración</div>
       </div>
 
       <!-- ===== PRODUCTOS ===== -->
@@ -224,6 +225,14 @@
                 <label>Orden (menor número = primero)</label>
                 <input type="number" id="categorySort" value="0" />
               </div>
+              <div class="field full">
+                <label>Foto de la categoría</label>
+                <div class="file-row">
+                  <img id="categoryImgPreview" class="img-preview hidden" src="" alt="" />
+                  <input type="file" id="categoryImageFile" accept="image/*" />
+                </div>
+                <input type="hidden" id="categoryImageUrl" />
+              </div>
             </div>
             <div style="margin-top:16px; display:flex; gap:10px;">
               <button type="submit" class="small-btn" style="background:var(--gold); color:var(--wine-dark);">Guardar categoría</button>
@@ -239,6 +248,29 @@
             <thead><tr><th>Nombre</th><th>Orden</th><th></th></tr></thead>
             <tbody id="categoriesTableBody"></tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- ===== CONFIGURACIÓN ===== -->
+      <div id="tab-settings" class="hidden">
+        <div class="panel-card">
+          <h3>WhatsApp</h3>
+          <form id="settingsForm">
+            <div class="form-grid">
+              <div class="field">
+                <label>Número de WhatsApp (con código de país, sin + ni espacios. Ej: 521234567890)</label>
+                <input type="text" id="whatsappNumber" required />
+              </div>
+              <div class="field full">
+                <label>Mensaje predeterminado</label>
+                <textarea id="whatsappMessage"></textarea>
+              </div>
+            </div>
+            <div style="margin-top:16px;">
+              <button type="submit" class="small-btn" style="background:var(--gold); color:var(--wine-dark);">Guardar configuración</button>
+            </div>
+            <p class="error-msg" id="settingsError"></p>
+          </form>
         </div>
       </div>
     </div>
