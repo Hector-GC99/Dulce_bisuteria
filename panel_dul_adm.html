@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Administración | DULCE</title>
+<link rel="stylesheet" href="assets/css/styles.css" />
+<link rel="stylesheet" href="assets/css/responsive.css" />
+<style>
+  body { background: var(--cream); }
+  .admin-header {
+    background: var(--wine);
+    color: var(--cream);
+    padding: 18px max(22px, calc((100vw - var(--max-width)) / 2));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .admin-header h1 { font-family: Georgia, serif; color: var(--gold); font-size: 22px; }
+  .admin-wrap { max-width: var(--max-width); margin: 0 auto; padding: 32px 22px 80px; }
+  .hidden { display: none !important; }
+
+  /* Login */
+  .login-box {
+    max-width: 380px;
+    margin: 80px auto;
+    background: var(--white);
+    border: 1px solid rgba(212,175,55,.25);
+    border-radius: var(--radius-md);
+    padding: 32px;
+    box-shadow: var(--shadow);
+  }
+  .login-box h2 { font-family: Georgia, serif; color: var(--wine-dark); margin-bottom: 18px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 700; color: var(--wine-dark); margin-bottom: 6px; }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid rgba(42,3,9,.18);
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 15px;
+  }
+  .field textarea { resize: vertical; min-height: 70px; }
+  .error-msg { color: #B3261E; font-size: 13px; margin-top: 8px; min-height: 18px; }
+  .btn-block { width: 100%; border: none; cursor: pointer; }
+
+  /* Tabs */
+  .admin-tabs { display: flex; gap: 10px; margin-bottom: 24px; }
+  .admin-tab {
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(90,11,24,.2);
+    background: var(--white);
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--wine-dark);
+  }
+  .admin-tab.active { background: var(--wine); color: var(--gold); border-color: var(--wine); }
+
+  /* Panels */
+  .panel-card {
+    background: var(--white);
+    border: 1px solid rgba(212,175,55,.2);
+    border-radius: var(--radius-md);
+    padding: 22px;
+    margin-bottom: 22px;
+  }
+  .panel-card h3 { font-family: Georgia, serif; color: var(--wine-dark); margin-bottom: 16px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid rgba(42,3,9,.08); font-size: 14px; }
+  th { color: var(--muted); text-transform: uppercase; font-size: 11px; letter-spacing: .08em; }
+  td img { width: 44px; height: 44px; object-fit: cover; border-radius: 8px; }
+  .badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 800; }
+  .badge.disponible { background: #E4F5E9; color: #1F7A3D; }
+  .badge.agotado { background: #FBE7E6; color: #B3261E; }
+  .row-actions { display: flex; gap: 8px; }
+  .row-actions button {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--wine-dark);
+  }
+  .row-actions button.danger { color: #B3261E; }
+
+  .small-btn {
+    padding: 9px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+  }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--wine);
+    color: var(--gold);
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    font-weight: 700;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all .25s ease;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .img-preview { width: 70px; height: 70px; object-fit: cover; border-radius: 10px; border: 1px solid rgba(42,3,9,.15); }
+  .file-row { display: flex; gap: 12px; align-items: center; }
+</style>
+</head>
+<body>
+
+  <!-- ============ LOGIN ============ -->
+  <div id="loginView" class="login-box">
+    <h2>Acceso administrador</h2>
+    <form id="loginForm">
+      <div class="field">
+        <label>Correo</label>
+        <input type="email" id="loginEmail" required autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Contraseña</label>
+        <input type="password" id="loginPassword" required autocomplete="current-password" />
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Entrar</button>
+      <p class="error-msg" id="loginError"></p>
+    </form>
+  </div>
+
+  <!-- ============ PANEL ============ -->
+  <div id="panelView" class="hidden">
+    <div class="admin-header">
+      <h1>DULCE · Administración</h1>
+      <div style="display:flex; gap:14px; align-items:center;">
+        <a class="btn btn-outline" href="index.html" style="color:var(--gold); padding:8px 14px;">Ver sitio</a>
+        <button class="small-btn" id="logoutBtn" style="background:var(--gold); color:var(--wine-dark);">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <div class="admin-wrap">
+      <div class="admin-tabs">
+        <div class="admin-tab active" data-tab="products">Productos</div>
+        <div class="admin-tab" data-tab="categories">Categorías</div>
+      </div>
+
+      <!-- ===== PRODUCTOS ===== -->
+      <div id="tab-products">
+        <div class="panel-card">
+          <h3 id="productFormTitle">Agregar producto</h3>
+          <form id="productForm">
+            <input type="hidden" id="productId" />
+            <div class="form-grid">
+              <div class="field">
+                <label>Nombre</label>
+                <input type="text" id="productName" required />
+              </div>
+              <div class="field">
+                <label>Categoría</label>
+                <select id="productCategory" required></select>
+              </div>
+              <div class="field">
+                <label>Precio (MXN)</label>
+                <input type="number" id="productPrice" min="0" step="0.01" />
+              </div>
+              <div class="field">
+                <label>Estatus</label>
+                <select id="productStatus">
+                  <option value="disponible">Disponible</option>
+                  <option value="agotado">Agotado</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label>Descripción</label>
+                <textarea id="productDescription"></textarea>
+              </div>
+              <div class="field full">
+                <label>Foto del producto</label>
+                <div class="file-row">
+                  <img id="productImgPreview" class="img-preview hidden" src="" alt="" />
+                  <input type="file" id="productImageFile" accept="image/*" />
+                </div>
+                <input type="hidden" id="productImageUrl" />
+              </div>
+            </div>
+            <div style="margin-top:16px; display:flex; gap:10px;">
+              <button type="submit" class="small-btn" style="background:var(--gold); color:var(--wine-dark);">Guardar producto</button>
+              <button type="button" id="cancelProductEdit" class="small-btn hidden" style="background:transparent; border:1px solid rgba(42,3,9,.2);">Cancelar edición</button>
+            </div>
+            <p class="error-msg" id="productError"></p>
+          </form>
+        </div>
+
+        <div class="panel-card">
+          <h3>Productos actuales</h3>
+          <table>
+            <thead>
+              <tr><th>Foto</th><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Estatus</th><th></th></tr>
+            </thead>
+            <tbody id="productsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== CATEGORÍAS ===== -->
+      <div id="tab-categories" class="hidden">
+        <div class="panel-card">
+          <h3 id="categoryFormTitle">Agregar categoría</h3>
+          <form id="categoryForm">
+            <input type="hidden" id="categoryId" />
+            <div class="form-grid">
+              <div class="field">
+                <label>Nombre</label>
+                <input type="text" id="categoryName" required />
+              </div>
+              <div class="field">
+                <label>Orden (menor número = primero)</label>
+                <input type="number" id="categorySort" value="0" />
+              </div>
+            </div>
+            <div style="margin-top:16px; display:flex; gap:10px;">
+              <button type="submit" class="small-btn" style="background:var(--gold); color:var(--wine-dark);">Guardar categoría</button>
+              <button type="button" id="cancelCategoryEdit" class="small-btn hidden" style="background:transparent; border:1px solid rgba(42,3,9,.2);">Cancelar edición</button>
+            </div>
+            <p class="error-msg" id="categoryError"></p>
+          </form>
+        </div>
+
+        <div class="panel-card">
+          <h3>Categorías actuales</h3>
+          <table>
+            <thead><tr><th>Nombre</th><th>Orden</th><th></th></tr></thead>
+            <tbody id="categoriesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="assets/js/supabase-client.js"></script>
+  <script src="assets/js/admin.js"></script>
+</body>
+</html>

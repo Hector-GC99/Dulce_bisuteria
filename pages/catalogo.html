@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo | DULCE</title>
+  <link rel="stylesheet" href="../assets/css/styles.css" />
+  <link rel="stylesheet" href="../assets/css/responsive.css" />
+  <link rel="stylesheet" href="../assets/css/animations.css" />
+</head>
+<body>
+  <header class="site-header">
+    <nav class="navbar">
+      <a class="brand" href="../index.html"><img src="../assets/images/branding/logo.png" alt="DULCE" /></a>
+      <div class="nav-menu" id="navMenu">
+        <a href="../index.html#colecciones">Colecciones</a>
+        <a href="catalogo.html">Catálogo</a>
+        <a href="../index.html#nosotros">Nosotros</a>
+        <a class="nav-cta" href="https://wa.me/521234567890" target="_blank">WhatsApp</a>
+      </div>
+      <button class="nav-toggle" id="navToggle"><span></span><span></span><span></span></button>
+    </nav>
+  </header>
+
+  <main class="section">
+    <div class="section-heading">
+      <p class="eyebrow">DULCE</p>
+      <h2>Catálogo</h2>
+      <p>Bisutería fina pensada para acompañarte todos los días.</p>
+    </div>
+
+    <div class="filters" aria-label="Filtros de catálogo">
+      <button class="filter-btn active" data-filter="todos">Todos</button>
+      <button class="filter-btn" data-filter="Aretes">Aretes</button>
+      <button class="filter-btn" data-filter="Collares">Collares</button>
+      <button class="filter-btn" data-filter="Pulseras">Pulseras</button>
+      <button class="filter-btn" data-filter="Anillos">Anillos</button>
+      <button class="filter-btn" data-filter="Sets">Sets</button>
+    </div>
+
+    <div class="product-grid" id="catalogGrid"></div>
+  </main>
+
+  <footer class="site-footer">
+    <h3>DULCE</h3>
+    <p>Bisutería fina para resaltar tu esencia.</p>
+    <div class="footer-links">
+      <a href="../index.html">Inicio</a>
+      <a href="catalogo.html">Catálogo</a>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/catalog-public.js"></script>
+  <script src="../assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "nombre": "Aretes Luz",
+    "categoria": "Aretes",
+    "precio": 249,
+    "imagen": "assets/images/productos/aretes/aretes-luz.jpg"
+  },
+  {
+    "id": 2,
+    "nombre": "Aretes Diamante",
+    "categoria": "Aretes",
+    "precio": 279,
+    "imagen": "assets/images/productos/aretes/aretes-diamante.jpg"
+  },
+  {
+    "id": 3,
+    "nombre": "Collar Dulce",
+    "categoria": "Collares",
+    "precio": 329,
+    "imagen": "assets/images/productos/collares/collar-dulce.jpg"
+  },
+  {
+    "id": 4,
+    "nombre": "Collar Estrella",
+    "categoria": "Collares",
+    "precio": 349,
+    "imagen": "assets/images/productos/collares/collar-estrella.jpg"
+  },
+  {
+    "id": 5,
+    "nombre": "Pulsera Oro",
+    "categoria": "Pulseras",
+    "precio": 299,
+    "imagen": "assets/images/productos/pulseras/pulsera-oro.jpg"
+  },
+  {
+    "id": 6,
+    "nombre": "Anillo Brillo",
+    "categoria": "Anillos",
+    "precio": 259,
+    "imagen": "assets/images/productos/anillos/anillo-brillo.jpg"
+  },
+  {
+    "id": 7,
+    "nombre": "Anillo Clásico",
+    "categoria": "Anillos",
+    "precio": 289,
+    "imagen": "assets/images/productos/anillos/anillo-clasico.jpg"
+  },
+  {
+    "id": 8,
+    "nombre": "Set Premium",
+    "categoria": "Sets",
+    "precio": 599,
+    "imagen": "assets/images/productos/sets/set-premium.jpg"
+  }
+]
