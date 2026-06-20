@@ -124,7 +124,26 @@ function attachFilterListeners() {
   });
 }
 
+async function applyWhatsappSettings() {
+  const { data, error } = await supabaseClient.from("site_settings").select("*");
+  if (error || !data) return;
+
+  const map = {};
+  data.forEach((row) => (map[row.key] = row.value));
+
+  const number = map.whatsapp_number;
+  const message = map.whatsapp_message || "";
+  if (!number) return;
+
+  const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+
+  document.querySelectorAll('a[href^="https://wa.me/"]').forEach((link) => {
+    link.setAttribute("href", url);
+  });
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
+  applyWhatsappSettings();
   await renderFilterButtons(".filters");
   await renderFeaturedProducts();
   await renderCategoryGrid();
