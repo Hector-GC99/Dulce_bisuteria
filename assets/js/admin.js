@@ -55,6 +55,7 @@ document.querySelectorAll(".admin-tab").forEach((tab) => {
     tab.classList.add("active");
     document.getElementById("tab-products").classList.toggle("hidden", tab.dataset.tab !== "products");
     document.getElementById("tab-categories").classList.toggle("hidden", tab.dataset.tab !== "categories");
+    document.getElementById("tab-settings").classList.toggle("hidden", tab.dataset.tab !== "settings");
   });
 });
 
@@ -62,6 +63,7 @@ document.querySelectorAll(".admin-tab").forEach((tab) => {
 async function initPanel() {
   await loadCategories();
   await loadProducts();
+  await loadSettings();
 }
 
 // =========================================================
@@ -119,6 +121,37 @@ function slugify(text) {
     .replace(/(^-|-$)/g, "");
 }
 
+document.getElementById("categoryImageFile").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const preview = document.getElementById("categoryImgPreview");
+  preview.src = URL.createObjectURL(file);
+  preview.classList.remove("hidden");
+
+  const errorEl = document.getElementById("categoryError");
+  errorEl.textContent = "Subiendo imagen...";
+
+  const fileExt = file.name.split(".").pop();
+  const fileName = `categories/${Date.now()}-${Math.random().toString(36).slice(2)}.${fileExt}`;
+
+  const { error: uploadError } = await supabaseClient.storage
+    .from("product-images")
+    .upload(fileName, file);
+
+  if (uploadError) {
+    errorEl.textContent = "No se pudo subir la imagen.";
+    return;
+  }
+
+  const { data: publicUrlData } = supabaseClient.storage
+    .from("product-images")
+    .getPublicUrl(fileName);
+
+  document.getElementById("categoryImageUrl").value = publicUrlData.publicUrl;
+  errorEl.textContent = "";
+});
+
 document.getElementById("categoryForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const errorEl = document.getElementById("categoryError");
@@ -127,9 +160,10 @@ document.getElementById("categoryForm").addEventListener("submit", async (e) => 
   const id = document.getElementById("categoryId").value;
   const name = document.getElementById("categoryName").value.trim();
   const sort_order = Number(document.getElementById("categorySort").value) || 0;
+  const image_url = document.getElementById("categoryImageUrl").value || null;
   const slug = slugify(name);
 
-  const payload = { name, slug, sort_order };
+  const payload = { name, slug, sort_order, image_url };
 
   let result;
   if (id) {
@@ -155,13 +189,26 @@ function editCategory(id) {
   document.getElementById("categoryId").value = cat.id;
   document.getElementById("categoryName").value = cat.name;
   document.getElementById("categorySort").value = cat.sort_order ?? 0;
+  document.getElementById("categoryImageUrl").value = cat.image_url || "";
+
+  const preview = document.getElementById("categoryImgPreview");
+  if (cat.image_url) {
+    preview.src = cat.image_url;
+    preview.classList.remove("hidden");
+  } else {
+    preview.classList.add("hidden");
+  }
+
   document.getElementById("categoryFormTitle").textContent = "Editar categoría";
   document.getElementById("cancelCategoryEdit").classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 function resetCategoryForm() {
   document.getElementById("categoryForm").reset();
   document.getElementById("categoryId").value = "";
+  document.getElementById("categoryImageUrl").value = "";
+  document.getElementById("categoryImgPreview").classList.add("hidden");
   document.getElementById("categoryFormTitle").textContent = "Agregar categoría";
   document.getElementById("cancelCategoryEdit").classList.add("hidden");
 }
@@ -344,3 +391,40 @@ async function deleteProduct(id) {
 
 // ---------- START ----------
 checkSession();
+
+// =========================================================
+// CONFIGURACIÓN DEL SITIO (WhatsApp)
+// =========================================================
+async function loadSettings() {
+  const { data, error } = await supabaseClient.from("site_settings").select("*");
+  if (error || !data) return;
+
+  const map = {};
+  data.forEach((row) => (map[row.key] = row.value));
+
+  document.getElementById("whatsappNumber").value = map.whatsapp_number || "";
+  document.getElementById("whatsappMessage").value = map.whatsapp_message || "";
+}
+
+document.getElementById("settingsForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const errorEl = document.getElementById("settingsError");
+  errorEl.textContent = "";
+
+  const number = document.getElementById("whatsappNumber").value.trim();
+  const message = document.getElementById("whatsappMessage").value.trim();
+
+  const { error } = await supabaseClient
+    .from("site_settings")
+    .upsert([
+      { key: "whatsapp_number", value: number },
+      { key: "whatsapp_message", value: message },
+    ]);
+
+  if (error) {
+    errorEl.textContent = "No se pudo guardar la configuración.";
+    return;
+  }
+
+  showToast("Configuración guardada");
+});
