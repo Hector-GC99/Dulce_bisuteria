@@ -262,7 +262,8 @@ function attachProductClickHandlers(products) {
   });
 }
 
-
+// ---------- INICIO ----------
+document.addEventListener("DOMContentLoaded", async () => {
   applyWhatsappSettings();
   await renderFilterButtons(".filters");
   await renderFeaturedProducts();
