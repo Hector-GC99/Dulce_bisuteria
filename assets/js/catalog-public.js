@@ -12,7 +12,7 @@ function productCardHTML(p) {
   const categoryName = p.categories ? p.categories.name : "";
   const soldOut = p.status === "agotado";
   return `
-    <article class="product-card" data-category="${categoryName}">
+    <article class="product-card" data-category="${categoryName}" data-id="${p.id}">
       <div style="position:relative;">
         <img src="${p.image_url || ''}" alt="${p.name}" />
         ${soldOut ? `<span style="position:absolute; top:10px; left:10px; background:#2A0309; color:#D4AF37; font-size:11px; font-weight:800; padding:5px 10px; border-radius:999px;">AGOTADO</span>` : ""}
@@ -69,6 +69,7 @@ async function renderFeaturedProducts(limit = 8) {
   if (error || !data) return;
   grid.innerHTML = data.map(productCardHTML).join("");
   attachFilterListeners();
+  attachProductClickHandlers(data);
 }
 
 async function renderCategoryGrid() {
@@ -101,6 +102,7 @@ async function renderFullCatalog() {
 
   grid.innerHTML = data.map(productCardHTML).join("");
   attachFilterListeners();
+  attachProductClickHandlers(data);
 
   // Filtro inicial si viene ?categoria= en la URL
   const params = new URLSearchParams(window.location.search);
@@ -143,7 +145,124 @@ async function applyWhatsappSettings() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
+// =========================================================
+// MODAL DE PRODUCTO (clic en una tarjeta abre detalle)
+// =========================================================
+function injectModalStyles() {
+  if (document.getElementById("dulce-modal-styles")) return;
+  const style = document.createElement("style");
+  style.id = "dulce-modal-styles";
+  style.textContent = `
+    .dulce-modal-overlay {
+      position: fixed; inset: 0; background: rgba(20,2,5,.72);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 999; padding: 22px; opacity: 0; pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .dulce-modal-overlay.is-open { opacity: 1; pointer-events: all; }
+    .dulce-modal-box {
+      background: var(--cream, #F8F4EE); border-radius: 22px; max-width: 760px;
+      width: 100%; max-height: 88vh; overflow-y: auto; display: grid;
+      grid-template-columns: 1fr 1fr; box-shadow: 0 30px 80px rgba(0,0,0,.35);
+      transform: translateY(16px); transition: transform .25s ease;
+    }
+    .dulce-modal-overlay.is-open .dulce-modal-box { transform: translateY(0); }
+    .dulce-modal-box img { width: 100%; height: 100%; object-fit: cover; min-height: 280px; }
+    .dulce-modal-info { padding: 28px; position: relative; }
+    .dulce-modal-close {
+      position: absolute; top: 14px; right: 14px; width: 34px; height: 34px;
+      border-radius: 999px; border: none; background: rgba(42,3,9,.08);
+      font-size: 18px; cursor: pointer; color: var(--wine-dark, #2A0309);
+    }
+    .dulce-modal-info span.dulce-modal-cat {
+      text-transform: uppercase; letter-spacing: .14em; font-size: 11px;
+      font-weight: 800; color: var(--gold-soft, #DDBB66);
+    }
+    .dulce-modal-info h2 {
+      font-family: Georgia, serif; color: var(--wine-dark, #2A0309);
+      font-size: 28px; margin: 8px 0 12px;
+    }
+    .dulce-modal-info .dulce-modal-price {
+      font-weight: 800; color: var(--wine, #2A0309); font-size: 20px; margin-bottom: 14px;
+    }
+    .dulce-modal-info .dulce-modal-desc { color: var(--muted, #7C6E63); line-height: 1.6; margin-bottom: 18px; }
+    @media (max-width: 640px) {
+      .dulce-modal-box { grid-template-columns: 1fr; }
+      .dulce-modal-box img { min-height: 220px; }
+    }
+  `;
+  document.head.appendChild(style);
+}
+
+function ensureModalElement() {
+  let overlay = document.getElementById("dulceProductModal");
+  if (overlay) return overlay;
+
+  overlay = document.createElement("div");
+  overlay.id = "dulceProductModal";
+  overlay.className = "dulce-modal-overlay";
+  overlay.innerHTML = `
+    <div class="dulce-modal-box">
+      <img id="dulceModalImg" src="" alt="" />
+      <div class="dulce-modal-info">
+        <button class="dulce-modal-close" id="dulceModalClose" aria-label="Cerrar">✕</button>
+        <span class="dulce-modal-cat" id="dulceModalCat"></span>
+        <h2 id="dulceModalName"></h2>
+        <p class="dulce-modal-price" id="dulceModalPrice"></p>
+        <p class="dulce-modal-desc" id="dulceModalDesc"></p>
+        <span class="badge" id="dulceModalStatus"></span>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeProductModal();
+  });
+  document.getElementById("dulceModalClose").addEventListener("click", closeProductModal);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeProductModal();
+  });
+
+  return overlay;
+}
+
+function openProductModal(p) {
+  injectModalStyles();
+  const overlay = ensureModalElement();
+
+  document.getElementById("dulceModalImg").src = p.image_url || "";
+  document.getElementById("dulceModalImg").alt = p.name;
+  document.getElementById("dulceModalCat").textContent = p.categories ? p.categories.name : "";
+  document.getElementById("dulceModalName").textContent = p.name;
+  document.getElementById("dulceModalPrice").textContent = formatPrice(p.price);
+  document.getElementById("dulceModalDesc").textContent = p.description || "Sin descripción disponible.";
+
+  const statusEl = document.getElementById("dulceModalStatus");
+  statusEl.textContent = p.status === "agotado" ? "Agotado" : "Disponible";
+  statusEl.className = `badge ${p.status}`;
+
+  overlay.classList.add("is-open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeProductModal() {
+  const overlay = document.getElementById("dulceProductModal");
+  if (!overlay) return;
+  overlay.classList.remove("is-open");
+  document.body.style.overflow = "";
+}
+
+function attachProductClickHandlers(products) {
+  document.querySelectorAll(".product-card").forEach((card) => {
+    card.style.cursor = "pointer";
+    card.addEventListener("click", () => {
+      const product = products.find((p) => p.id === card.dataset.id);
+      if (product) openProductModal(product);
+    });
+  });
+}
+
+
   applyWhatsappSettings();
   await renderFilterButtons(".filters");
   await renderFeaturedProducts();
