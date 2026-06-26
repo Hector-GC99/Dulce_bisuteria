@@ -56,7 +56,7 @@ async function renderFilterButtons(containerSelector) {
   attachFilterListeners();
 }
 
-async function renderFeaturedProducts(limit = 8) {
+async function renderFeaturedProducts(limit = 200) {
   const grid = document.getElementById("productGrid");
   if (!grid) return;
 
