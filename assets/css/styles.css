@@ -581,3 +581,8 @@ a {
   flex-wrap: wrap;
   color: rgba(248, 244, 238, 0.78);
 }
+.catalog-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 34px;
+}
