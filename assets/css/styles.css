@@ -1,8 +1,9 @@
 /* =========================================================
    DULCE | styles.css
-   Archivo principal de estilos para escritorio/base.
-   Responsive se maneja en responsive.css.
-   Animaciones se manejan en animations.css.
+   Versión pulida: Header + Hero editorial + diseño base
+   Nota:
+   - Responsive se mantiene en responsive.css
+   - Animaciones se mantienen en animations.css
 ========================================================= */
 
 /* =========================
@@ -19,6 +20,7 @@
   --white: #FFFFFF;
 
   --shadow: 0 24px 80px rgba(42, 3, 9, 0.16);
+  --shadow-hero: 0 36px 90px rgba(0, 0, 0, 0.32);
   --radius-lg: 28px;
   --radius-md: 18px;
   --max-width: 1180px;
@@ -68,9 +70,9 @@ a {
 
 .navbar {
   width: 100%;
-  max-width: 1500px;
+  max-width: none;
   margin: 0 auto;
-  padding: 10px 60px;
+  padding: 10px 48px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -79,15 +81,14 @@ a {
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
   color: var(--gold);
   font-family: Georgia, serif;
   letter-spacing: 0;
+  flex: 0 0 auto;
 }
 
-/* Logo header horizontal */
 .brand img {
-  width: 260px;
+  width: 285px;
   height: 78px;
   object-fit: contain;
   object-position: left center;
@@ -96,7 +97,7 @@ a {
 .nav-menu {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 26px;
   color: var(--cream);
   font-size: 14px;
 }
@@ -112,7 +113,7 @@ a {
 }
 
 .nav-cta {
-  padding: 10px 16px;
+  padding: 10px 18px;
   border: 1px solid var(--gold);
   border-radius: 999px;
   color: var(--gold) !important;
@@ -137,34 +138,40 @@ a {
 }
 
 /* =========================
-   4. HERO PRINCIPAL
+   4. HERO EDITORIAL
 ========================= */
 .hero {
   min-height: calc(100vh - 98px);
-  background: var(--wine);
+  background:
+    radial-gradient(circle at 18% 35%, rgba(92, 15, 29, 0.42), transparent 34%),
+    linear-gradient(115deg, #2A0309 0%, #2A0309 50%, #360712 100%);
   color: var(--cream);
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.9fr);
+  grid-template-columns: 55% 45%;
   align-items: stretch;
-  gap: 30px;
-  padding: 0 0 0 max(22px, calc((100vw - var(--max-width)) / 2));
+  gap: 0;
+  padding: 0 0 0 48px;
   overflow: hidden;
   position: relative;
 }
 
 .hero-content {
+  max-width: 650px;
   align-self: center;
-  padding-bottom: 0;
-  transform: translateY(-35px);
+  justify-self: start;
+  transform: translateX(42px) translateY(-26px);
+  position: relative;
+  z-index: 2;
 }
 
 .hero-content h1 {
   font-family: Georgia, serif;
-  font-size: clamp(42px, 7vw, 82px);
-  line-height: 0.98;
+  font-size: clamp(48px, 6.4vw, 88px);
+  line-height: 0.96;
   color: var(--gold);
-  margin-bottom: 22px;
-  max-width: 760px;
+  margin-bottom: 24px;
+  max-width: 640px;
+  letter-spacing: -0.03em;
 }
 
 .hero-content p {
@@ -180,20 +187,71 @@ a {
   flex-wrap: wrap;
 }
 
-.hero-card {
-  height: calc(100vh - 98px);
-  display: flex;
-  align-items: stretch;
-  justify-content: center;
-  overflow: hidden;
+.hero-card{
+    height: calc(100vh - 98px);
+    min-height: 620px;
+
+    display:block;
+    overflow:hidden;
+    position:relative;
+}
+
+/* ==========================================
+   Transición curva entre Hero e Imagen
+========================================== */
+
+.hero-card::before{
+
+    content:"";
+
+    position:absolute;
+
+    top:-5%;
+    left:-110px;
+
+    width:280px;
+    height:110%;
+
+    z-index:2;
+
+    pointer-events:none;
+
+    border-radius:0 100% 100% 0;
+
+    background:
+        radial-gradient(
+            ellipse at left center,
+
+            rgba(42,3,9,1) 0%,
+
+            rgba(42,3,9,.98) 25%,
+
+            rgba(42,3,9,.90) 45%,
+
+            rgba(42,3,9,.65) 62%,
+
+            rgba(42,3,9,.28) 78%,
+
+            rgba(42,3,9,0) 100%
+        );
+
+}
+
+.hero-card img{
+
+    width:100%;
+    height:100%;
+
+    object-fit:cover;
+    object-position:center 58%;
+
+    display:block;
+
 }
 
 .hero-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 60%;
-  display: block;
+  position: relative;
+  z-index: 0;
 }
 
 /* =========================
