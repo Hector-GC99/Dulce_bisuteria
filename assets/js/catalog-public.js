@@ -266,7 +266,7 @@ function attachProductClickHandlers(products) {
 document.addEventListener("DOMContentLoaded", async () => {
   applyWhatsappSettings();
   await renderFilterButtons(".filters");
-  await renderFeaturedProducts();
+  await renderFeaturedProducts(100);
   await renderCategoryGrid();
   await renderFullCatalog();
 });
