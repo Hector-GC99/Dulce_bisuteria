@@ -1,7 +1,15 @@
+/* =========================================================
+   DULCE | styles.css
+   Archivo principal de estilos para escritorio/base.
+   Responsive se maneja en responsive.css.
+   Animaciones se manejan en animations.css.
+========================================================= */
+
+/* =========================
+   1. VARIABLES GENERALES
+========================= */
 :root {
   --wine: #2A0309;
-  --wine-dark: #2A0309;
-  --wine-soft: #2A0309;
   --gold: #D4AF37;
   --gold-soft: #DDBB66;
   --cream: #F8F4EE;
@@ -9,15 +17,25 @@
   --text: #2A2A2A;
   --muted: #7C6E63;
   --white: #FFFFFF;
+
   --shadow: 0 24px 80px rgba(42, 3, 9, 0.16);
   --radius-lg: 28px;
   --radius-md: 18px;
   --max-width: 1180px;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; }
+/* =========================
+   2. RESET BASE
+========================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   font-family: "Montserrat", Arial, sans-serif;
@@ -26,10 +44,19 @@ body {
   line-height: 1.6;
 }
 
-img { max-width: 100%; display: block; }
+img {
+  max-width: 100%;
+  display: block;
+}
 
-a { color: inherit; text-decoration: none; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
+/* =========================
+   3. HEADER / NAVBAR
+========================= */
 .site-header {
   position: sticky;
   top: 0;
@@ -40,9 +67,10 @@ a { color: inherit; text-decoration: none; }
 }
 
 .navbar {
-  max-width: var(--max-width);
+  width: 100%;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 7px 22px;
+  padding: 10px 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -53,14 +81,14 @@ a { color: inherit; text-decoration: none; }
   align-items: center;
   gap: 10px;
   color: var(--gold);
-  letter-spacing: 0.28em;
   font-family: Georgia, serif;
-  font-size: 18px;
+  letter-spacing: 0;
 }
 
+/* Logo header horizontal */
 .brand img {
   width: 260px;
-  height: 75px;
+  height: 78px;
   object-fit: contain;
   object-position: left center;
 }
@@ -73,8 +101,15 @@ a { color: inherit; text-decoration: none; }
   font-size: 14px;
 }
 
-.nav-menu a { opacity: 0.9; transition: color .2s ease, opacity .2s ease; }
-.nav-menu a:hover { color: var(--gold); opacity: 1; }
+.nav-menu a {
+  opacity: 0.9;
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.nav-menu a:hover {
+  color: var(--gold);
+  opacity: 1;
+}
 
 .nav-cta {
   padding: 10px 16px;
@@ -101,21 +136,26 @@ a { color: inherit; text-decoration: none; }
   margin: 5px auto;
 }
 
+/* =========================
+   4. HERO PRINCIPAL
+========================= */
 .hero {
-  min-height: calc(100vh - 76px);
-  background: linear-gradient(115deg, #1c0207 0%, #3a0712 45%, #5c0f1d 100%);
+  min-height: calc(100vh - 98px);
+  background: var(--wine);
   color: var(--cream);
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(360px, 0.9fr);
-  align-items: end;
+  align-items: stretch;
   gap: 30px;
-  padding: 0px 0 0 max(22px, calc((100vw - var(--max-width)) / 2));
+  padding: 0 0 0 max(22px, calc((100vw - var(--max-width)) / 2));
   overflow: hidden;
   position: relative;
 }
 
 .hero-content {
-  padding-bottom: 90px;
+  align-self: center;
+  padding-bottom: 0;
+  transform: translateY(-35px);
 }
 
 .hero-content h1 {
@@ -129,17 +169,8 @@ a { color: inherit; text-decoration: none; }
 
 .hero-content p {
   max-width: 610px;
-  color: rgba(248,244,238,0.88);
+  color: rgba(248, 244, 238, 0.88);
   font-size: 18px;
-}
-
-.eyebrow {
-  text-transform: uppercase;
-  letter-spacing: .28em;
-  color: var(--gold-soft);
-  font-size: 12px;
-  font-weight: 700;
-  margin-bottom: 12px;
 }
 
 .hero-actions {
@@ -149,6 +180,25 @@ a { color: inherit; text-decoration: none; }
   flex-wrap: wrap;
 }
 
+.hero-card {
+  height: calc(100vh - 98px);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.hero-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 60%;
+  display: block;
+}
+
+/* =========================
+   5. BOTONES
+========================= */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -156,37 +206,27 @@ a { color: inherit; text-decoration: none; }
   padding: 13px 22px;
   border-radius: 999px;
   font-weight: 700;
-  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
-.btn:hover { transform: translateY(-2px); }
+.btn:hover {
+  transform: translateY(-2px);
+}
 
 .btn-primary {
   background: var(--gold);
-  color: var(--wine-dark);
-  box-shadow: 0 12px 28px rgba(212,175,55,.22);
+  color: var(--wine);
+  box-shadow: 0 12px 28px rgba(212, 175, 55, 0.22);
 }
 
 .btn-outline {
-  border: 1px solid rgba(212,175,55,.6);
+  border: 1px solid rgba(212, 175, 55, 0.6);
   color: var(--gold);
 }
 
-.hero-card {
-  height: calc(100vh - 76px);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.hero-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: top center;
-  display: block;
-}
-
+/* =========================
+   6. SECCIONES GENERALES
+========================= */
 .section {
   max-width: var(--max-width);
   margin: 0 auto;
@@ -201,19 +241,32 @@ a { color: inherit; text-decoration: none; }
 
 .section-heading h2,
 .about-text h2,
-.premium-content h2,
 .contact-box h2 {
   font-family: Georgia, serif;
-  color: var(--wine-dark);
+  color: var(--wine);
   font-size: clamp(32px, 5vw, 52px);
   line-height: 1.08;
 }
 
 .section-heading p:not(.eyebrow),
 .about-text p,
-.premium-content p,
-.contact-box p { color: var(--muted); margin-top: 12px; }
+.contact-box p {
+  color: var(--muted);
+  margin-top: 12px;
+}
 
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--gold-soft);
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+/* =========================
+   7. CATEGORÍAS
+========================= */
 .category-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -234,16 +287,18 @@ a { color: inherit; text-decoration: none; }
   height: 100%;
   min-height: 310px;
   object-fit: cover;
-  transition: transform .35s ease;
+  transition: transform 0.35s ease;
 }
 
-.category-card:hover img { transform: scale(1.04); }
+.category-card:hover img {
+  transform: scale(1.04);
+}
 
 .category-card::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 35%, rgba(42,3,9,.86));
+  background: linear-gradient(180deg, transparent 35%, rgba(42, 3, 9, 0.86));
 }
 
 .category-card div {
@@ -261,8 +316,14 @@ a { color: inherit; text-decoration: none; }
   color: var(--gold);
 }
 
-.category-card a { font-size: 14px; border-bottom: 1px solid var(--gold); }
+.category-card a {
+  font-size: 14px;
+  border-bottom: 1px solid var(--gold);
+}
 
+/* =========================
+   8. CATÁLOGO / PRODUCTOS
+========================= */
 .filters {
   display: flex;
   justify-content: center;
@@ -272,14 +333,14 @@ a { color: inherit; text-decoration: none; }
 }
 
 .filter-btn {
-  border: 1px solid rgba(90,11,24,.22);
+  border: 1px solid rgba(42, 3, 9, 0.22);
   background: var(--white);
-  color: var(--wine-dark);
+  color: var(--wine);
   border-radius: 999px;
   padding: 10px 16px;
   cursor: pointer;
   font-weight: 700;
-  transition: all .2s ease;
+  transition: all 0.2s ease;
 }
 
 .filter-btn.active,
@@ -299,14 +360,14 @@ a { color: inherit; text-decoration: none; }
   background: var(--white);
   border-radius: var(--radius-md);
   overflow: hidden;
-  box-shadow: 0 18px 50px rgba(42, 3, 9, .10);
-  border: 1px solid rgba(212,175,55,.2);
-  transition: transform .25s ease, box-shadow .25s ease;
+  box-shadow: 0 18px 50px rgba(42, 3, 9, 0.10);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .product-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 24px 65px rgba(42, 3, 9, .16);
+  box-shadow: 0 24px 65px rgba(42, 3, 9, 0.16);
 }
 
 .product-card img {
@@ -315,19 +376,21 @@ a { color: inherit; text-decoration: none; }
   object-fit: cover;
 }
 
-.product-info { padding: 18px; }
+.product-info {
+  padding: 18px;
+}
 
 .product-info span {
   color: var(--gold-soft);
   text-transform: uppercase;
-  letter-spacing: .18em;
+  letter-spacing: 0.18em;
   font-size: 11px;
   font-weight: 800;
 }
 
 .product-info h3 {
   font-family: Georgia, serif;
-  color: var(--wine-dark);
+  color: var(--wine);
   font-size: 22px;
   margin: 6px 0;
 }
@@ -337,28 +400,12 @@ a { color: inherit; text-decoration: none; }
   font-weight: 800;
 }
 
-.premium {
-  max-width: none;
-  min-height: 440px;
-  background:
-    linear-gradient(90deg, rgba(42,3,9,.96), rgba(42,3,9,.78)),
-    url("../images/banners/coleccion-premium.jpg") center/cover;
-  display: flex;
-  align-items: center;
-  padding: 90px max(22px, calc((100vw - var(--max-width)) / 2));
-}
-
-.premium-content {
-  max-width: 560px;
-  color: var(--cream);
-}
-
-.premium-content h2 { color: var(--gold); }
-.premium-content p { color: rgba(248,244,238,.86); margin-bottom: 26px; }
-
+/* =========================
+   9. NOSOTROS
+========================= */
 .about {
   display: grid;
-  grid-template-columns: .85fr 1.15fr;
+  grid-template-columns: 0.85fr 1.15fr;
   gap: 52px;
   align-items: center;
 }
@@ -370,7 +417,10 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow);
 }
 
-.about-logo img { border-radius: 20px; }
+.about-logo img {
+  border-radius: 20px;
+  object-fit: cover;
+}
 
 .features {
   display: grid;
@@ -381,7 +431,7 @@ a { color: inherit; text-decoration: none; }
 
 .features div {
   background: var(--white);
-  border: 1px solid rgba(212,175,55,.25);
+  border: 1px solid rgba(212, 175, 55, 0.25);
   border-radius: 18px;
   padding: 18px;
 }
@@ -393,21 +443,14 @@ a { color: inherit; text-decoration: none; }
   font-size: 28px;
 }
 
-.features span { color: var(--wine-dark); font-weight: 700; }
-
-.instagram-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 12px;
+.features span {
+  color: var(--wine);
+  font-weight: 700;
 }
 
-.instagram-grid img {
-  aspect-ratio: 1/1;
-  object-fit: cover;
-  border-radius: 18px;
-  border: 1px solid rgba(212,175,55,.22);
-}
-
+/* =========================
+   10. CONTACTO
+========================= */
 .contact-box {
   background: var(--wine);
   color: var(--cream);
@@ -417,9 +460,18 @@ a { color: inherit; text-decoration: none; }
   box-shadow: var(--shadow);
 }
 
-.contact-box h2 { color: var(--gold); }
-.contact-box p { color: rgba(248,244,238,.86); margin-bottom: 28px; }
+.contact-box h2 {
+  color: var(--gold);
+}
 
+.contact-box p {
+  color: rgba(248, 244, 238, 0.86);
+  margin-bottom: 28px;
+}
+
+/* =========================
+   11. WHATSAPP FLOTANTE
+========================= */
 .whatsapp-float {
   position: fixed;
   right: 22px;
@@ -429,13 +481,21 @@ a { color: inherit; text-decoration: none; }
   height: 58px;
   border-radius: 999px;
   background: var(--gold);
-  color: var(--wine-dark);
+  color: var(--wine);
   display: grid;
   place-items: center;
-  
-  box-shadow: 0 16px 36px rgba(42,3,9,.22);
+  box-shadow: 0 16px 36px rgba(42, 3, 9, 0.22);
 }
 
+.whatsapp-float svg {
+  width: 31px;
+  height: 31px;
+  fill: var(--wine);
+}
+
+/* =========================
+   12. FOOTER
+========================= */
 .site-footer {
   background: var(--wine);
   color: var(--cream);
@@ -449,34 +509,17 @@ a { color: inherit; text-decoration: none; }
 .site-footer h3 {
   font-family: Georgia, serif;
   color: var(--gold);
-  letter-spacing: .25em;
+  letter-spacing: 0.25em;
 }
 
-.site-footer p { color: rgba(248,244,238,.72); }
+.site-footer p {
+  color: rgba(248, 244, 238, 0.72);
+  max-width: 420px;
+}
 
 .footer-links {
   display: flex;
   gap: 18px;
   flex-wrap: wrap;
-  color: rgba(248,244,238,.78);
-}
-
-.whatsapp-float svg {
-  width: 31px;
-  height: 31px;
-  fill: var(--wine-dark);
-}
-
-.hero-card img,
-.about-logo img {
-  object-fit: cover;
-}
-
-/* Ajustes DULCE v2 */
-.hero-content h1 {
-  max-width: 760px;
-}
-
-.site-footer p {
-  max-width: 420px;
+  color: rgba(248, 244, 238, 0.78);
 }
