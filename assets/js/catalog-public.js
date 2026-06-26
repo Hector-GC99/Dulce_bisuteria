@@ -56,7 +56,7 @@ async function renderFilterButtons(containerSelector) {
   attachFilterListeners();
 }
 
-async function renderFeaturedProducts(limit = 200) {
+async function renderFeaturedProducts(limit = 12) {
   const grid = document.getElementById("productGrid");
   if (!grid) return;
 
@@ -266,7 +266,7 @@ function attachProductClickHandlers(products) {
 document.addEventListener("DOMContentLoaded", async () => {
   applyWhatsappSettings();
   await renderFilterButtons(".filters");
-  await renderFeaturedProducts(100);
+  await renderFeaturedProducts(12);
   await renderCategoryGrid();
   await renderFullCatalog();
 });
