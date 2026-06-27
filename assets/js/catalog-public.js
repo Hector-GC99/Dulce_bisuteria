@@ -1,26 +1,75 @@
 // =========================================================
 // Carga pública de catálogo (solo lectura, sin login)
 // Usado por: index.html (destacados) y pages/catalogo.html
+// Incluye selector visual de variaciones de color.
 // =========================================================
 
 function formatPrice(value) {
-  if (value == null) return "";
+  if (value == null || value === "") return "";
   return "$" + Number(value).toFixed(0);
+}
+
+function escapeHTML(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function getSortedVariants(product) {
+  const variants = Array.isArray(product.product_variants) ? product.product_variants : [];
+  return variants
+    .filter((variant) => variant && variant.variant_name)
+    .sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0));
+}
+
+function getDisplayData(product, variant = null) {
+  return {
+    image_url: variant?.image_url || product.image_url || "",
+    price: variant?.price != null ? variant.price : product.price,
+    status: variant?.status || product.status || "disponible",
+  };
+}
+
+function variantSwatchesHTML(product, location = "card") {
+  const variants = getSortedVariants(product);
+  if (variants.length < 2) return "";
+
+  return `
+    <div class="product-variants ${location === "modal" ? "modal-variants" : ""}" aria-label="Variaciones de color">
+      ${variants.map((variant, index) => `
+        <button
+          type="button"
+          class="variant-swatch ${index === 0 ? "active" : ""}"
+          data-product-id="${product.id}"
+          data-variant-index="${index}"
+          title="${escapeHTML(variant.variant_name)}"
+          aria-label="${escapeHTML(variant.variant_name)}">
+          <svg class="variant-swatch-svg" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="7" fill="${escapeHTML(variant.color_hex || "#C0C0C0")}"></circle></svg>
+        </button>
+      `).join("")}
+    </div>`;
 }
 
 function productCardHTML(p) {
   const categoryName = p.categories ? p.categories.name : "";
-  const soldOut = p.status === "agotado";
+  const firstVariant = getSortedVariants(p)[0] || null;
+  const display = getDisplayData(p, firstVariant);
+  const soldOut = display.status === "agotado";
+
   return `
-    <article class="product-card" data-category="${categoryName}" data-id="${p.id}">
-      <div style="position:relative;">
-        <img src="${p.image_url || ''}" alt="${p.name}" />
-        ${soldOut ? `<span style="position:absolute; top:10px; left:10px; background:#2A0309; color:#D4AF37; font-size:11px; font-weight:800; padding:5px 10px; border-radius:999px;">AGOTADO</span>` : ""}
+    <article class="product-card" data-category="${escapeHTML(categoryName)}" data-id="${p.id}" data-selected-variant="0">
+      <div class="product-image-wrap">
+        <img class="product-card-img" src="${display.image_url}" alt="${escapeHTML(p.name)}" />
+        <span class="product-soldout-badge ${soldOut ? "" : "hidden"}">AGOTADO</span>
       </div>
       <div class="product-info">
-        <span>${categoryName}</span>
-        <h3>${p.name}</h3>
-        <p>${formatPrice(p.price)}</p>
+        <span>${escapeHTML(categoryName)}</span>
+        <h3>${escapeHTML(p.name)}</h3>
+        <p class="product-card-price">${formatPrice(display.price)}</p>
+        ${variantSwatchesHTML(p, "card")}
       </div>
     </article>`;
 }
@@ -29,9 +78,9 @@ function categoryCardHTML(cat) {
   const fallbackImage = `assets/images/categorias/${cat.slug}.jpg`;
   return `
     <article class="category-card">
-      <img src="${cat.image_url || fallbackImage}" alt="${cat.name}" />
+      <img src="${cat.image_url || fallbackImage}" alt="${escapeHTML(cat.name)}" />
       <div>
-        <h3>${cat.name}</h3>
+        <h3>${escapeHTML(cat.name)}</h3>
         <a href="pages/catalogo.html?categoria=${encodeURIComponent(cat.name)}">Ver más</a>
       </div>
     </article>`;
@@ -50,25 +99,35 @@ async function renderFilterButtons(containerSelector) {
 
   const buttonsHTML =
     `<button class="filter-btn active" data-filter="todos">Todos</button>` +
-    data.map((c) => `<button class="filter-btn" data-filter="${c.name}">${c.name}</button>`).join("");
+    data.map((c) => `<button class="filter-btn" data-filter="${escapeHTML(c.name)}">${escapeHTML(c.name)}</button>`).join("");
 
   container.innerHTML = buttonsHTML;
   attachFilterListeners();
+}
+
+async function fetchProducts(limit = null) {
+  let query = supabaseClient
+    .from("products")
+    .select("*, categories(name, slug), product_variants(*)")
+    .order("sort_order", { ascending: true });
+
+  if (limit) query = query.limit(limit);
+
+  const { data, error } = await query;
+  if (error || !data) return { data: [], error };
+  return { data, error: null };
 }
 
 async function renderFeaturedProducts(limit = 12) {
   const grid = document.getElementById("productGrid");
   if (!grid) return;
 
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select("*, categories(name, slug)")
-    .order("sort_order", { ascending: true })
-    .limit(limit);
+  const { data, error } = await fetchProducts(limit);
+  if (error) return;
 
-  if (error || !data) return;
   grid.innerHTML = data.map(productCardHTML).join("");
   attachFilterListeners();
+  attachVariantSwatchHandlers(data);
   attachProductClickHandlers(data);
 }
 
@@ -90,10 +149,7 @@ async function renderFullCatalog() {
   const grid = document.getElementById("catalogGrid");
   if (!grid) return;
 
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select("*, categories(name, slug)")
-    .order("sort_order", { ascending: true });
+  const { data, error } = await fetchProducts();
 
   if (error || !data) {
     grid.innerHTML = "<p>No se pudieron cargar los productos.</p>";
@@ -102,6 +158,7 @@ async function renderFullCatalog() {
 
   grid.innerHTML = data.map(productCardHTML).join("");
   attachFilterListeners();
+  attachVariantSwatchHandlers(data);
   attachProductClickHandlers(data);
 
   // Filtro inicial si viene ?categoria= en la URL
@@ -123,6 +180,35 @@ function attachFilterListeners() {
         const show = filter === "todos" || card.dataset.category === filter;
         card.classList.toggle("is-hidden", !show);
       });
+    });
+  });
+}
+
+function attachVariantSwatchHandlers(products) {
+  document.querySelectorAll(".product-card .variant-swatch").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const card = btn.closest(".product-card");
+      const product = products.find((p) => p.id === btn.dataset.productId);
+      if (!card || !product) return;
+
+      const variantIndex = Number(btn.dataset.variantIndex) || 0;
+      const variant = getSortedVariants(product)[variantIndex];
+      const display = getDisplayData(product, variant);
+
+      card.dataset.selectedVariant = String(variantIndex);
+      const img = card.querySelector(".product-card-img");
+      const price = card.querySelector(".product-card-price");
+      const badge = card.querySelector(".product-soldout-badge");
+
+      if (img) img.src = display.image_url;
+      if (price) price.textContent = formatPrice(display.price);
+      if (badge) badge.classList.toggle("hidden", display.status !== "agotado");
+
+      card.querySelectorAll(".variant-swatch").forEach((swatch) => swatch.classList.remove("active"));
+      btn.classList.add("active");
     });
   });
 }
@@ -167,7 +253,7 @@ function injectModalStyles() {
       transform: translateY(16px); transition: transform .25s ease;
     }
     .dulce-modal-overlay.is-open .dulce-modal-box { transform: translateY(0); }
-    .dulce-modal-box img { width: 100%; height: 100%; object-fit: cover; min-height: 280px; }
+    .dulce-modal-img { width: 100%; height: 100%; object-fit: cover; min-height: 280px; }
     .dulce-modal-info { padding: 28px; position: relative; }
     .dulce-modal-close {
       position: absolute; top: 14px; right: 14px; width: 34px; height: 34px;
@@ -186,9 +272,11 @@ function injectModalStyles() {
       font-weight: 800; color: var(--wine, #2A0309); font-size: 20px; margin-bottom: 14px;
     }
     .dulce-modal-info .dulce-modal-desc { color: var(--muted, #7C6E63); line-height: 1.6; margin-bottom: 18px; }
+    .dulce-modal-tone-label { color: var(--wine-dark, #2A0309); font-weight: 800; font-size: 13px; margin: 4px 0 8px; }
+    .modal-variants { justify-content: flex-start; margin: 0 0 16px; }
     @media (max-width: 640px) {
       .dulce-modal-box { grid-template-columns: 1fr; }
-      .dulce-modal-box img { min-height: 220px; }
+      .dulce-modal-img { min-height: 220px; }
     }
   `;
   document.head.appendChild(style);
@@ -203,12 +291,13 @@ function ensureModalElement() {
   overlay.className = "dulce-modal-overlay";
   overlay.innerHTML = `
     <div class="dulce-modal-box">
-      <img id="dulceModalImg" src="" alt="" />
+      <img id="dulceModalImg" class="dulce-modal-img" src="" alt="" />
       <div class="dulce-modal-info">
         <button class="dulce-modal-close" id="dulceModalClose" aria-label="Cerrar">✕</button>
         <span class="dulce-modal-cat" id="dulceModalCat"></span>
         <h2 id="dulceModalName"></h2>
         <p class="dulce-modal-price" id="dulceModalPrice"></p>
+        <div id="dulceModalVariantsWrap"></div>
         <p class="dulce-modal-desc" id="dulceModalDesc"></p>
         <span class="badge" id="dulceModalStatus"></span>
       </div>
@@ -226,20 +315,57 @@ function ensureModalElement() {
   return overlay;
 }
 
-function openProductModal(p) {
+function renderModalVariantControls(product, selectedIndex = 0) {
+  const wrap = document.getElementById("dulceModalVariantsWrap");
+  if (!wrap) return;
+
+  const variants = getSortedVariants(product);
+  if (variants.length < 2) {
+    wrap.innerHTML = "";
+    return;
+  }
+
+  wrap.innerHTML = `
+    <p class="dulce-modal-tone-label">Tonos disponibles</p>
+    ${variantSwatchesHTML(product, "modal")}
+  `;
+
+  wrap.querySelectorAll(".variant-swatch").forEach((btn) => {
+    const index = Number(btn.dataset.variantIndex) || 0;
+    btn.classList.toggle("active", index === selectedIndex);
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      updateModalDisplay(product, index);
+      wrap.querySelectorAll(".variant-swatch").forEach((swatch) => swatch.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+}
+
+function updateModalDisplay(product, variantIndex = 0) {
+  const variant = getSortedVariants(product)[variantIndex] || null;
+  const display = getDisplayData(product, variant);
+
+  document.getElementById("dulceModalImg").src = display.image_url;
+  document.getElementById("dulceModalImg").alt = product.name;
+  document.getElementById("dulceModalPrice").textContent = formatPrice(display.price);
+
+  const statusEl = document.getElementById("dulceModalStatus");
+  statusEl.textContent = display.status === "agotado" ? "Agotado" : "Disponible";
+  statusEl.className = `badge ${display.status}`;
+}
+
+function openProductModal(product, selectedVariantIndex = 0) {
   injectModalStyles();
   const overlay = ensureModalElement();
 
-  document.getElementById("dulceModalImg").src = p.image_url || "";
-  document.getElementById("dulceModalImg").alt = p.name;
-  document.getElementById("dulceModalCat").textContent = p.categories ? p.categories.name : "";
-  document.getElementById("dulceModalName").textContent = p.name;
-  document.getElementById("dulceModalPrice").textContent = formatPrice(p.price);
-  document.getElementById("dulceModalDesc").textContent = p.description || "Sin descripción disponible.";
+  document.getElementById("dulceModalCat").textContent = product.categories ? product.categories.name : "";
+  document.getElementById("dulceModalName").textContent = product.name;
+  document.getElementById("dulceModalDesc").textContent = product.description || "Sin descripción disponible.";
 
-  const statusEl = document.getElementById("dulceModalStatus");
-  statusEl.textContent = p.status === "agotado" ? "Agotado" : "Disponible";
-  statusEl.className = `badge ${p.status}`;
+  updateModalDisplay(product, selectedVariantIndex);
+  renderModalVariantControls(product, selectedVariantIndex);
 
   overlay.classList.add("is-open");
   document.body.style.overflow = "hidden";
@@ -257,7 +383,8 @@ function attachProductClickHandlers(products) {
     card.style.cursor = "pointer";
     card.addEventListener("click", () => {
       const product = products.find((p) => p.id === card.dataset.id);
-      if (product) openProductModal(product);
+      const selectedIndex = Number(card.dataset.selectedVariant) || 0;
+      if (product) openProductModal(product, selectedIndex);
     });
   });
 }
